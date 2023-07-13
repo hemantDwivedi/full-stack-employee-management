@@ -10,9 +10,11 @@ function App() {
     <>
       <BrowserRouter>
         <HeaderComponent />
-        <Routes><Route path='/' element={<ListEmployeeComponent />}></Route></Routes>
-        <Routes><Route path='/employees' element={<ListEmployeeComponent />}></Route></Routes>
-        <Routes><Route path='/add-employee' element={<EmployeeComponent />}></Route></Routes>
+        <Routes>
+          <Route path='/' element={<ListEmployeeComponent />} />
+          <Route path="/employees" element={<ListEmployeeComponent />} />
+          <Route path='/add-employee' element={<EmployeeComponent />} />
+        </Routes>
         <FooterComponent />
       </BrowserRouter>
     </>
