@@ -1,12 +1,24 @@
-import { useState } from "react"
-import { createEmployee } from "../services/EmployeeService"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { createEmployee, retrieveSpecificEmployee, udpateExistingEmployee } from "../services/EmployeeService"
+import { useNavigate, useParams } from "react-router-dom"
 
 const EmployeeComponent = () => {
 
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
+    const {id} = useParams()
+    useEffect(() => {
+        if(id) {
+            retrieveSpecificEmployee(id)
+            .then(response => {
+                setFirstName(response.data.firstName)
+                setLastName(response.data.lastName)
+                setEmail(response.data.email)
+            })
+            .catch(error => console.error(error))
+        }
+    }, [id])
 
     const [errors, setErrors] = useState({
         firstName: '',
@@ -16,14 +28,19 @@ const EmployeeComponent = () => {
 
     const navigate = useNavigate()
 
-    function saveEmployee(event) {
+    function saveOrUpdateEmployee(event) {
         event.preventDefault();
-
         if (validateForm()) {
             const employee = { firstName, lastName, email }
-            createEmployee(employee)
-                .then(response => navigate('/employees'))
-                .catch(error => { console.error(error); navigate('/add-employee') })
+            if(id){
+                udpateExistingEmployee(employee, id)
+                .then(navigate('/employees'))
+                .catch(error => console.error(error))
+            } else{
+                createEmployee(employee)
+                    .then(navigate('/employees'))
+                    .catch(error => { console.error(error); navigate('/add-employee') })
+            }
         }
     }
 
@@ -56,13 +73,21 @@ const EmployeeComponent = () => {
         return valid;
     }
 
+    function pageTitle(){
+        if(id){
+            return <p className="fs-3 fw-light text-center">Update Employee</p>
+        } else{
+            return <p className="fs-3 fw-light text-center">Add Employee Details</p>
+        }
+    }
+
     return (
         <div>
             <div className="container p-5">
                 <div className="row">
                     <div className="card col-md-6 offset-md-3 offset-md-3 mt-5">
                         <div className="pt-3">
-                            <p className="fs-3 fw-light text-center">Add New Employee Details</p>
+                            {pageTitle()}
                             <hr />
                         </div>
                         <div className="card-body">
@@ -79,7 +104,7 @@ const EmployeeComponent = () => {
                                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                                 </div>
                                 <div className="mt-3">
-                                    <button className="btn btn-danger fw-bold" onClick={saveEmployee}>Submit</button>
+                                    <button className="btn btn-danger fw-bold" onClick={saveOrUpdateEmployee}>Submit</button>
                                 </div>
                             </form>
                         </div>
